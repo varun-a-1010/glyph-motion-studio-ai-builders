@@ -1,0 +1,68 @@
+name: Verify and deploy AI Builders only
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: glyph-ai-builders-static-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'varun-a-1010/glyph-motion-studio-ai-builders' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.0.5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - name: Verify and build
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm lint
+          pnpm check
+          pnpm test
+          python3 -m unittest discover -s deploy -p 'test_*.py'
+          pnpm build
+          node -e 'require("fs").writeFileSync("build/deployment.json", JSON.stringify({repository:process.env.GITHUB_REPOSITORY,sha:process.env.GITHUB_SHA}))'
+          tar -czf glyph-builders.tar.gz -C build .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: glyph-builders-${{ github.sha }}
+          path: glyph-builders.tar.gz
+          retention-days: 14
+      - name: Deploy through dedicated restricted identity
+        if: vars.GLYPH_BUILDERS_DEPLOY_ENABLED == 'true'
+        env:
+          BUILDERS_KEY: ${{ secrets.GLYPH_BUILDERS_SSH_KEY }}
+          BUILDERS_HOST_KEYS: ${{ secrets.GLYPH_BUILDERS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test -n "$BUILDERS_KEY"
+          test -n "$BUILDERS_HOST_KEYS"
+          install -d -m 700 "$RUNNER_TEMP/builders-ssh"
+          printf '%s\n' "$BUILDERS_KEY" > "$RUNNER_TEMP/builders-ssh/key"
+          printf '%s\n' "$BUILDERS_HOST_KEYS" > "$RUNNER_TEMP/builders-ssh/known_hosts"
+          chmod 600 "$RUNNER_TEMP/builders-ssh/key" "$RUNNER_TEMP/builders-ssh/known_hosts"
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/builders-ssh/known_hosts" \
+            -i "$RUNNER_TEMP/builders-ssh/key" glyph-builders@137.184.239.80 \
+            "deploy $GITHUB_SHA" < glyph-builders.tar.gz
+          curl --fail --silent --show-error --retry 3 \
+            https://glyph-builders.slate-app.online/deployment.json > "$RUNNER_TEMP/live-deployment.json"
+          cmp build/deployment.json "$RUNNER_TEMP/live-deployment.json"
+          curl --fail --silent --show-error https://glyph-builders.slate-app.online/ > "$RUNNER_TEMP/live-index.html"
+          cmp build/index.html "$RUNNER_TEMP/live-index.html"
+      - name: Report gated deployment
+        if: vars.GLYPH_BUILDERS_DEPLOY_ENABLED != 'true'
+        run: echo 'Build verified; deployment is disabled until the isolated hostname and restricted SSH account are provisioned.'

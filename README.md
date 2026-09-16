@@ -1,8 +1,10 @@
-# Glyph Motion Studio for WebMCP
+# Glyph Motion Studio — AI Builders
 
 **Direct motion in natural language. Keep every keyframe under your control.**
 
-**Live studio:** [glyph-motion.slate-app.online](https://glyph-motion.slate-app.online)
+**AI Builders deployment hostname:** `glyph-builders.slate-app.online`.
+This is an independent copy of the earlier WebMCP project. That earlier repository
+and its deployment are frozen and are never deployment targets for this copy.
 
 Glyph Motion Studio is a visual GSAP editor that lets **your own browser agent** compose and animate vector scenes through [WebMCP](https://github.com/webmachinelearning/webmcp). The page registers ten typed site tools. The agent can safely switch among bundled workspaces, build a scene from primitives and bundled artwork, assign semantic roles and pivots, inspect animation targets ("the symbol", "all accents", "the wordmark"), and stage a validated GSAP timeline on the canvas you are looking at. The page keeps preview approval, validation, rendering, undo, reduced motion and saving. **No arbitrary generated code or markup is ever executed.**
 
@@ -51,7 +53,27 @@ pnpm build        # static build in ./build
 
 Node 20+. No backend, no accounts, no API keys: projects save to the browser's local storage.
 
-Pushes to `main` are verified and deployed as an atomic static release to the live studio. Nginx serves the generated `build/` directory directly; no application process runs on the server.
+### Isolated AI Builders deployment
+
+`.github/workflows/ai-builders.yml` verifies `main` and retains a static build artifact.
+Deployment runs only when repository variable `GLYPH_BUILDERS_DEPLOY_ENABLED` is
+`true`, with secrets `GLYPH_BUILDERS_SSH_KEY` and `GLYPH_BUILDERS_KNOWN_HOSTS`.
+The SSH key is a dedicated forced-command identity, not a Slate or WebMCP deploy key.
+The root-owned receiver (`deploy/receive.py`) accepts only a commit-bound static
+archive and promotes it atomically under `/var/www/glyph-motion-studio-ai-builders`.
+It rejects path traversal, links, special files, hidden files, oversized archives,
+and artifacts naming a different repository. Previous releases are retained.
+
+Nginx serves `build/` directly: no app process, backend, database, or API key is needed.
+The two Nginx templates refer only to `glyph-builders.slate-app.online` and its own
+certificate/ACME directory. Initial DNS, TLS and edge activation are provisioned
+separately. Routine deployment never changes Nginx, certificates, DNS, or other apps.
+Deployment verification compares the public commit receipt and HTML with the exact
+CI artifact. A verification-only run is not evidence of a live deployment.
+
+Scenes created in a browser stay in that browser's editing session/local storage;
+they are not automatically baked into a deployment. Judges can reproduce scenes
+through the prompts above with a compatible browser agent.
 
 ### Let an agent in
 

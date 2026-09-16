@@ -16,3 +16,4 @@ vite.config.ts.timestamp-*
 *.log
 coverage
 .claude/settings.local.json
+__pycache__/
