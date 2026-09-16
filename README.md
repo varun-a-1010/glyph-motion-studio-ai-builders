@@ -35,6 +35,25 @@ Choose **Motion Playground**. It begins as a blank, editable vector layer rather
 
 The agent calls `get_scene` → `inspect_vector_scene` → `preview_scene_patch`. The composition appears without changing the committed project. After you approve and apply it, the newly created nodes immediately become semantic animation targets. A second prompt can choreograph the sweep, stagger the contacts and reveal the status through the same timeline tools used by the bundled scenes.
 
+### Replay the AI Builders demo scenes
+
+The sample menu includes two complete, editable compositions created with Glyph's
+scene tools. Select one and press **Play**; no agent setup or local saved project is
+required.
+
+- [Order to Door](https://glyph-builders.slate-app.online/?scene=order-to-door-scene):
+  the delivery example from the demo, with 29 vector primitives and a ten-second,
+  23-step timeline. Pack three items, follow one parcel into a truck, coordinate
+  its wheels, and deliver it before revealing the final status.
+- [Signal Foundry](https://glyph-builders.slate-app.online/?scene=signal-foundry-scene):
+  six inputs converge on a processor before a verified result appears, with 28
+  editable primitives and 22 timeline steps.
+
+These are bundled starting points, not flattened recordings. Semantic groups,
+wheel pivots, vector geometry and timeline steps remain editable using the same
+preview/apply workflow. Each selection builds an independent copy. Existing
+browser-saved projects retain the editor's normal per-sample persistence behavior.
+
 ### Try the multi-SVG mission
 
 Choose **Space Mission** from the sample menu. It combines four original, independently scoped SVGs: a ringed planet, a communications satellite, a staged launch vehicle and a transparent mission plot. The rocket exposes detachable boosters, stages, payload fairings and a stowed satellite; the plot exposes flight paths, a ground station, uplink and completion status. Their repeated internal ids are safely namespaced, while all 59 semantic parts remain available in one bounded agent inspection.

@@ -5,6 +5,8 @@ import orbitSimple from './orbit-simple';
 import spacePlanet from './space-planet';
 import spaceRocket from './space-rocket';
 import spaceSatellite from './space-satellite';
+import { buildOrderToDoor } from './order-to-door';
+import { buildSignalFoundry } from './signal-foundry';
 
 export const ARTWORK: Record<string, Artwork> = {
 	'glyph-hero': glyphHero,
@@ -34,7 +36,7 @@ const SATELLITE_ELEMENT_ID = 'satellite';
 const ROCKET_ELEMENT_ID = 'rocket';
 const PLAYGROUND_ELEMENT_ID = 'playground';
 
-/** Deliberately plain baseline: everything fades and scales in at once. */
+/** Baseline starter scenes plus editable, fully animated demo compositions. */
 export const SAMPLE_SCENES: SampleScene[] = [
 	{
 		id: 'glyph-hero-scene',
@@ -79,6 +81,20 @@ export const SAMPLE_SCENES: SampleScene[] = [
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString()
 		})
+	},
+	{
+		id: 'order-to-door-scene',
+		name: 'Order to Door',
+		description:
+			'The delivery demo: 29 editable vector parts and a complete ten-second packing, driving and delivery animation.',
+		build: buildOrderToDoor
+	},
+	{
+		id: 'signal-foundry-scene',
+		name: 'Signal Foundry',
+		description:
+			'Six signals converge on a processor and produce a verified result, with editable vectors and a coordinated timeline.',
+		build: buildSignalFoundry
 	},
 	{
 		id: 'motion-playground-scene',
